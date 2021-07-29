@@ -1,0 +1,33 @@
+<library path="lib/libposition_velocity_torque_gains_controllers">
+
+  <class name="position_velocity_torque_gains_controllers/JointPositionController" type="position_velocity_torque_gains_controllers::JointPositionController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointPositionController tracks position commands. It expects a PositionVelocityTorqueGainsInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="position_velocity_torque_gains_controllers/JointVelocityController" type="position_velocity_torque_gains_controllers::JointVelocityController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointVelocityController tracks velocity commands. It expects a PositionVelocityTorqueGainsInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="position_velocity_torque_gains_controllers/JointEffortController" type="position_velocity_torque_gains_controllers::JointEffortController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointEffortController tracks effort commands. It expects a PositionVelocityTorqueGainsInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="position_velocity_torque_gains_controllers/JointGroupEffortController" type="position_velocity_torque_gains_controllers::JointGroupEffortController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointGroupEffortController tracks effort commands for a set of joints. It expects a PositionVelocityTorqueGainsInterface type of hardware interface.
+    </description>
+  </class>
+  
+  <class name="position_velocity_torque_gains_controllers/JointGroupPositionController" type="position_velocity_torque_gains_controllers::JointGroupPositionController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointGroupPositionController tracks position commands for a set of joints. It expects a PositionVelocityTorqueGainsInterface type of hardware interface.
+    </description>
+  </class>
+
+</library>
