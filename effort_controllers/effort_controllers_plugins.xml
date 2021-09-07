@@ -18,15 +18,21 @@
     </description>
   </class>
 
-  <class name="effort_controllers/JointGroupEffortController" type="effort_controllers::JointGroupEffortController" base_class_type="controller_interface::ControllerBase">
+  <class name="effort_controllers/JointGroupVelocityController" type="effort_controllers::JointGroupVelocityController" base_class_type="controller_interface::ControllerBase">
     <description>
-      The JointGroupEffortController tracks effort commands for a set of joints. It expects a EffortJointInterface type of hardware interface.
+      The JointGroupVelocityController tracks velocity commands for a set of joints. It expects a EffortJointInterface type of hardware interface.
     </description>
   </class>
-  
+
   <class name="effort_controllers/JointGroupPositionController" type="effort_controllers::JointGroupPositionController" base_class_type="controller_interface::ControllerBase">
     <description>
       The JointGroupPositionController tracks position commands for a set of joints. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="effort_controllers/JointGroupEffortController" type="effort_controllers::JointGroupEffortController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointGroupEffortController tracks effort commands for a set of joints. It expects a EffortJointInterface type of hardware interface.
     </description>
   </class>
 
