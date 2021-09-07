@@ -43,17 +43,17 @@ namespace effort_controllers
 {
 
 /**
- * \brief Forward command controller for a set of effort controlled joints (torque or force).
+ * \brief Position controller (PID) for a set of effort controlled joints (torque or force).
  *
- * This class forwards the commanded efforts down to a set of joints.
+ * This class performs PID control on position commands and outputs efforts for a set of joints.
  *
  * \section ROS interface
  *
- * \param type Must be "JointGroupEffortController".
+ * \param type Must be "JointGroupPositionController".
  * \param joints List of names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64MultiArray) : The joint efforts to apply
+ * - \b command (std_msgs::Float64MultiArray) : The desired joint positions
  */
   JointGroupPositionController::JointGroupPositionController() {}
   JointGroupPositionController::~JointGroupPositionController() {sub_command_.shutdown();}
