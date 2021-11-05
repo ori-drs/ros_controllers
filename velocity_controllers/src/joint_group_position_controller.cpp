@@ -84,6 +84,7 @@ namespace velocity_controllers
     }
 
     pid_controllers_.resize(n_joints_);
+    controller_state_publishers_.resize(n_joints_);
 
     for(unsigned int i=0; i<n_joints_; i++)
     {
@@ -113,9 +114,18 @@ namespace velocity_controllers
         ROS_ERROR_STREAM("Failed to load PID parameters from " << joint_name + "/pid");
         return false;
       }
+
+      // Set up controller state publishers
+      controller_state_publishers_[i].reset(new realtime_tools::RealtimePublisher<control_msgs::JointControllerState>(n, joint_name + "/state", 10));
     }
 
     commands_buffer_.writeFromNonRT(std::vector<double>(n_joints_, 0.0));
+
+    pub_cmd_republisher_.init(n, "command_reference", 10);
+    {
+      std::lock_guard<realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray>> lock(pub_cmd_republisher_);
+      pub_cmd_republisher_.msg_.data.resize(n_joints_);
+    }
 
     sub_command_ = n.subscribe<std_msgs::Float64MultiArray>("command", 1, &JointGroupPositionController::commandCB, this);
     return true;
@@ -141,7 +151,7 @@ namespace velocity_controllers
         double command_position = commands[i];
 
         double error;
-        double commanded_effort;
+        double commanded_velocity;
 
         double current_position = joints_[i].getPosition();
 
@@ -169,10 +179,44 @@ namespace velocity_controllers
 
         // Set the PID error and compute the PID command with nonuniform
         // time step size.
-        commanded_effort = pid_controllers_[i].computeCommand(error, period);
+        commanded_velocity = pid_controllers_[i].computeCommand(error, period);
 
-        joints_[i].setCommand(commanded_effort);
+        joints_[i].setCommand(commanded_velocity);
+
+        // publish state
+        // TODO: Parametrise controller state publishing
+        if (loop_count_ % 1 == 0 && controller_state_publishers_[i]->trylock())
+        {
+          controller_state_publishers_[i]->msg_.header.stamp = time;
+          controller_state_publishers_[i]->msg_.set_point = command_position;
+          controller_state_publishers_[i]->msg_.process_value = current_position;
+          controller_state_publishers_[i]->msg_.process_value_dot = joints_[i].getVelocity();
+          controller_state_publishers_[i]->msg_.error = error;
+          controller_state_publishers_[i]->msg_.time_step = period.toSec();
+          controller_state_publishers_[i]->msg_.command = commanded_velocity;
+
+          double dummy;
+          bool antiwindup;
+          pid_controllers_[i].getGains(controller_state_publishers_[i]->msg_.p,
+            controller_state_publishers_[i]->msg_.i,
+            controller_state_publishers_[i]->msg_.d,
+            controller_state_publishers_[i]->msg_.i_clamp,
+            dummy,
+            antiwindup);
+          controller_state_publishers_[i]->msg_.antiwindup = static_cast<char>(antiwindup);
+          controller_state_publishers_[i]->unlockAndPublish();
+        }
     }
+
+    // Republish set-point
+    if (pub_cmd_republisher_.trylock())
+    {
+      pub_cmd_republisher_.msg_.data = commands;
+      pub_cmd_republisher_.unlockAndPublish();
+    }
+
+    // update counter for state publishing
+    loop_count_++;
   }
 
   void JointGroupPositionController::commandCB(const std_msgs::Float64MultiArrayConstPtr& msg)
