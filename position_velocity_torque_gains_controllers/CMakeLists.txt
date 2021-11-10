@@ -70,6 +70,6 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # Install plugins
-install(FILES position_velocity_torque_gains_controllers_plugins.xml
+install(FILES position_velocity_torque_gains_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
