@@ -84,6 +84,11 @@ private:
   ros::Subscriber sub_command_;
 
   std::vector<control_toolbox::Pid> pid_controllers_;       /**< Internal PID controllers. */
+  int loop_count_ = 0;
+  std::vector<std::unique_ptr<realtime_tools::RealtimePublisher<control_msgs::JointControllerState>>> controller_state_publishers_;
+  realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> pub_cmd_republisher_;  // Republish set-point so we can plot more easily
+  realtime_tools::RealtimeBuffer<ros::Time> last_received_command_time_buffer_;
+  double command_timeout_ = -1.0;
 
   std::vector<urdf::JointConstSharedPtr> joint_urdfs_;
 
