@@ -118,6 +118,13 @@ namespace effort_controllers
       controller_state_publishers_[i].reset(new realtime_tools::RealtimePublisher<control_msgs::JointControllerState>(n, joint_name + "/state", 10));
     }
 
+    // Check if timeout parameter has been set. Read it if set, otherwise warn about unsafe default behaviour.
+    if(n.hasParam("command_timeout"))
+    {
+      n.getParam("command_timeout", command_timeout_);
+      ROS_INFO_STREAM("Using command timeout: " << command_timeout_);
+    }
+
     commands_buffer_.writeFromNonRT(std::vector<double>(n_joints_, 0.0));
 
     pub_cmd_republisher_.init(n, "command_reference", 10);
@@ -143,6 +150,20 @@ namespace effort_controllers
   void JointGroupVelocityController::update(const ros::Time& time, const ros::Duration& period)
   {
     std::vector<double> & commands = *commands_buffer_.readFromRT();
+
+    // Check timeout
+    if (command_timeout_ > 0.0)
+    {
+      ros::Time& last_received_command_time = *last_received_command_time_buffer_.readFromRT();
+      const double command_age = (time - last_received_command_time).toSec();
+      if (std::abs(command_age) > command_timeout_)
+      {
+        ROS_WARN_STREAM_THROTTLE(10, "Commands timed out (" << command_age << "s), setting to zero.");
+        for (std::size_t i = 0; i < commands.size(); ++i)
+        {  commands[i] = 0;  }
+      }
+    }
+
     for(unsigned int i=0; i<n_joints_; i++)
     {
         double error = commands[i] - joints_[i].getVelocity();
@@ -208,6 +229,9 @@ namespace effort_controllers
       return;
     }
     commands_buffer_.writeFromNonRT(msg->data);
+
+    // Record time of last received command
+    last_received_command_time_buffer_.writeFromNonRT(ros::Time::now());
   }
 
 } // namespace
