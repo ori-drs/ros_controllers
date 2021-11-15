@@ -5,6 +5,7 @@
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
  *  Copyright (c) 2014, Fraunhofer IPA
+ *  Copyright (c) 2021, University of Oxford
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -83,6 +84,9 @@ private:
   ros::Subscriber sub_command_;
 
   std::vector<control_toolbox::Pid> pid_controllers_;       /**< Internal PID controllers. */
+  int loop_count_;
+  std::vector<std::unique_ptr<realtime_tools::RealtimePublisher<control_msgs::JointControllerState>>> controller_state_publishers_;
+  realtime_tools::RealtimePublisher<std_msgs::Float64MultiArray> pub_cmd_republisher_;  // Republish set-point so we can plot more easily
 
   std::vector<urdf::JointConstSharedPtr> joint_urdfs_;
 
