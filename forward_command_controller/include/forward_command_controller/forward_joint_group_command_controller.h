@@ -5,6 +5,7 @@
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
  *  Copyright (c) 2014, Fraunhofer IPA
+ *  Copyright (c) 2022, University of Oxford
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -38,14 +39,17 @@
 #pragma once
 
 
+#include <memory>
 #include <vector>
 #include <string>
 
 #include <ros/node_handle.h>
 #include <hardware_interface/joint_command_interface.h>
+#include <control_msgs/JointControllerState.h>
 #include <controller_interface/controller.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_publisher.h>
 
 
 namespace forward_command_controller
@@ -90,11 +94,16 @@ public:
       ROS_ERROR_STREAM("List of joint names is empty.");
       return false;
     }
+
+    controller_state_publishers_.resize(n_joints_);
     for(unsigned int i=0; i<n_joints_; i++)
     {
       try
       {
         joints_.push_back(hw->getHandle(joint_names_[i]));
+
+        // Create state publisher. Derived controllers need to overwrite update() to use these
+        controller_state_publishers_[i].reset(new realtime_tools::RealtimePublisher<control_msgs::JointControllerState>(n, joint_names_[i] + "/state", 10));
       }
       catch (const hardware_interface::HardwareInterfaceException& e)
       {
@@ -145,6 +154,8 @@ private:
     // Record time of last received command
     last_received_command_time_buffer_.writeFromNonRT(ros::Time::now());
   }
+
+  std::vector<std::unique_ptr<realtime_tools::RealtimePublisher<control_msgs::JointControllerState>>> controller_state_publishers_;
 };
 
-}
+}  // namespace forward_command_controller
