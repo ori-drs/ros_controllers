@@ -5,6 +5,7 @@
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
  *  Copyright (c) 2014, Fraunhofer IPA
+ *  Copyright (c) 2021-22, University of Oxford
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -63,8 +64,22 @@ void velocity_controllers::JointGroupVelocityController::update(const ros::Time&
     }
   }
 
+  // Set commands
   for(unsigned int i=0; i<n_joints_; i++)
   {  joints_[i].setCommand(commands[i]);  }
+
+  // Publish state
+  for(unsigned int i=0; i<n_joints_; i++)
+  {
+    if (controller_state_publishers_[i]->trylock())
+    {
+      controller_state_publishers_[i]->msg_.header.stamp = time;
+      controller_state_publishers_[i]->msg_.set_point = commands[i];
+      controller_state_publishers_[i]->msg_.process_value = joints_[i].getVelocity();
+      controller_state_publishers_[i]->msg_.error = commands[i] - joints_[i].getVelocity();
+      controller_state_publishers_[i]->unlockAndPublish();
+    }
+  }
 }
 
 PLUGINLIB_EXPORT_CLASS(velocity_controllers::JointGroupVelocityController,controller_interface::ControllerBase)
