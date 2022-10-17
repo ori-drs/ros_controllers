@@ -2,6 +2,11 @@
 Changelog for package forward_command_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.20.0 (2022-05-06)
+-------------------
+* Drop old C++ standard
+* Contributors: Jochen Sprickerhof
+
 0.19.0 (2021-06-13)
 -------------------
 

@@ -293,10 +293,10 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
   state_publisher_.reset(new StatePublisher(controller_nh_, "state", 1));
 
   // ROS API: Action interface
-  action_server_.reset(new ActionServer(controller_nh_, "follow_joint_trajectory",
-                                        boost::bind(&JointTrajectoryController::goalCB,   this, _1),
-                                        boost::bind(&JointTrajectoryController::cancelCB, this, _1),
-                                        false));
+  action_server_.reset(
+      new ActionServer(controller_nh_, "follow_joint_trajectory",
+                       std::bind(&JointTrajectoryController::goalCB, this, std::placeholders::_1),
+                       std::bind(&JointTrajectoryController::cancelCB, this, std::placeholders::_1), false));
   action_server_->start();
 
   // ROS API: Provided services
@@ -405,7 +405,10 @@ update(const ros::Time& time, const ros::Duration& period)
           }
           rt_segment_goal->preallocated_result_->error_code =
           control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+          rt_segment_goal->preallocated_result_->error_string = joint_names_[i] + " path error " + std::to_string( state_joint_error_.position[0] );
           rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
+          // Force this to run before destroying rt_active_goal_ so results message is returned
+          rt_active_goal_->runNonRealtime(ros::TimerEvent());
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
         }
@@ -440,7 +443,10 @@ update(const ros::Time& time, const ros::Duration& period)
           }
 
           rt_segment_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED;
+          rt_segment_goal->preallocated_result_->error_string = joint_names_[i] + " goal error " + std::to_string( state_joint_error_.position[0] );
           rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
+          // Force this to run before destroying rt_active_goal_ so results message is returned
+          rt_active_goal_->runNonRealtime(ros::TimerEvent());
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
         }
