@@ -157,6 +157,15 @@ bool GripperActionController<HardwareInterface>::init(HardwareInterface* hw,
     return false;
   }
 
+  // Params for transform between hardware and software gripper commands
+  if(controller_nh_.hasParam("joint_position_closed") && controller_nh_.hasParam("joint_position_open") && controller_nh_.hasParam("min_gap") && controller_nh_.hasParam("max_gap")) {
+    controller_nh_.getParam("joint_position_closed", joint_position_closed_);
+    controller_nh_.getParam("joint_position_open", joint_position_open_);
+    controller_nh_.getParam("min_gap", min_gap_);
+    controller_nh_.getParam("max_gap", max_gap_);
+    has_joint_to_gripper_command_remapping_ = true;
+  }
+
   // URDF joints
   urdf::ModelSharedPtr urdf = getUrdf(root_nh, "robot_description");
   if (!urdf)
@@ -264,7 +273,14 @@ goalCB(GoalHandle gh)
 
   // This is the non-realtime command_struct
   // We use command_ for sharing
+  // TODO: transform "position" in meters to control target in radians
+  if(has_joint_to_gripper_command_remapping_){
+    auto transformed_position = joint_position_closed_ + (joint_position_open_-joint_position_closed_)/(max_gap_-min_gap_)*(gh.getGoal()->command.position - min_gap_);
+    command_struct_.position_ = transformed_position;
+  }
+  else{
   command_struct_.position_ = gh.getGoal()->command.position;
+  }
   command_struct_.max_effort_ = gh.getGoal()->command.max_effort;
   command_.writeFromNonRT(command_struct_);
 

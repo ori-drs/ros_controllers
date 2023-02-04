@@ -140,6 +140,9 @@ private:
   double stall_timeout_, stall_velocity_threshold_;                 ///< Stall related parameters
   double default_max_effort_;                                       ///< Max allowed effort
   double goal_tolerance_;
+  double joint_position_closed_, joint_position_open_, min_gap_, max_gap_;
+  bool has_joint_to_gripper_command_remapping_{false};
+
   /**
    * \brief Check for success and publish appropriate result and feedback.
    **/
