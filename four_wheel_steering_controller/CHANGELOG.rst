@@ -2,6 +2,17 @@
 Changelog for package four_wheel_steering_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.21.1 (2023-01-31)
+-------------------
+* Don't hardcode plugin library path
+* add_dependencies was added to the CMakeLists.txt in four_wheel_steering_controller
+* Contributors: Jochen Sprickerhof, pavel
+
+0.21.0 (2022-10-21)
+-------------------
+* use boost::placeholders::_1/_2 in remaining instances, include boost/bind/bind.hpp instead of boost/bind.hpp, eliminated unnecessary bind.hpp include
+* Contributors: Lucas Walter
+
 0.20.0 (2022-05-06)
 -------------------
 * Drop old C++ standard
