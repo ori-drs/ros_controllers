@@ -143,6 +143,14 @@ namespace velocity_controllers
     commands_buffer_.initRT(current_positions);
   }
 
+  void JointGroupPositionController::stopping(const ros::Time& /*time*/)
+  {
+    for (std::size_t i = 0; i < n_joints_; ++i)
+    {
+      joints_[i].setCommand(0.0);
+    }
+  }
+
   void JointGroupPositionController::update(const ros::Time& time, const ros::Duration& period)
   {
     std::vector<double> & commands = *commands_buffer_.readFromRT();

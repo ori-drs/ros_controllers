@@ -5,7 +5,7 @@
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
  *  Copyright (c) 2014, Fraunhofer IPA
- *  Copyright (c) 2021, University of Oxford
+ *  Copyright (c) 2021-2023, University of Oxford
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -74,6 +74,7 @@ public:
   bool init(hardware_interface::VelocityJointInterface* hw, ros::NodeHandle &n);
   void update(const ros::Time& /*time*/, const ros::Duration& /*period*/);
   void starting(const ros::Time& /*time*/);
+  void stopping(const ros::Time& /*time*/);
 
   std::vector< std::string > joint_names_;
   std::vector< hardware_interface::JointHandle > joints_;
